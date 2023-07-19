@@ -1,0 +1,161 @@
+Certainly! Here's a code block in JavaScript for a simple implementation of the classic game "Snake" with an AI controlling the snake:
+
+```javascript
+// Snake game with AI
+
+// Game constants
+const canvasSize = 400;
+const gridSize = 20;
+const numCells = canvasSize / gridSize;
+
+// Snake object
+class Snake {
+  constructor() {
+    this.body = [
+      { x: numCells / 2, y: numCells / 2 },
+      { x: numCells / 2, y: numCells / 2 - 1 },
+      { x: numCells / 2, y: numCells / 2 - 2 },
+    ];
+    this.direction = "right";
+    this.score = 0;
+    this.isAlive = true;
+  }
+
+  move() {
+    // Update snake's head position based on current direction
+    const head = { ...this.body[0] };
+    switch (this.direction) {
+      case "up":
+        head.y -= 1;
+        break;
+      case "down":
+        head.y += 1;
+        break;
+      case "left":
+        head.x -= 1;
+        break;
+      case "right":
+        head.x += 1;
+        break;
+    }
+
+    // Check if the new position is valid
+    if (
+      head.x < 0 ||
+      head.x >= numCells ||
+      head.y < 0 ||
+      head.y >= numCells ||
+      this.body.some((cell) => cell.x === head.x && cell.y === head.y)
+    ) {
+      this.isAlive = false;
+      return;
+    }
+
+    // Move the snake by adding the new head and removing the tail
+    this.body.unshift(head);
+    if (this.body.length > this.score + 1) {
+      this.body.pop();
+    }
+  }
+
+  changeDirection(newDirection) {
+    // Prevent the snake from turning back on itself
+    if (
+      (this.direction === "up" && newDirection === "down") ||
+      (this.direction === "down" && newDirection === "up") ||
+      (this.direction === "left" && newDirection === "right") ||
+      (this.direction === "right" && newDirection === "left")
+    ) {
+      return;
+    }
+    this.direction = newDirection;
+  }
+
+  eat() {
+    this.score++;
+  }
+}
+
+// AI control logic
+class SnakeAI {
+  getNextMove(snake) {
+    // Change direction based on simple AI logic
+    const head = snake.body[0];
+    if (head.x % 2 === 0) {
+      if (head.y === 0) {
+        return "right";
+      } else {
+        return "up";
+      }
+    } else {
+      if (head.y === numCells - 1) {
+        return "left";
+      } else {
+        return "down";
+      }
+    }
+  }
+}
+
+// Game initialization
+const canvas = document.createElement("canvas");
+canvas.width = canvasSize;
+canvas.height = canvasSize;
+document.body.appendChild(canvas);
+const context = canvas.getContext("2d");
+const snake = new Snake();
+const ai = new SnakeAI();
+let intervalId;
+
+// Event listeners for user input
+window.addEventListener("keydown", (event) => {
+  switch (event.key) {
+    case "ArrowUp":
+      snake.changeDirection("up");
+      break;
+    case "ArrowDown":
+      snake.changeDirection("down");
+      break;
+    case "ArrowLeft":
+      snake.changeDirection("left");
+      break;
+    case "ArrowRight":
+      snake.changeDirection("right");
+      break;
+  }
+});
+
+// Game loop
+function gameLoop() {
+  context.clearRect(0, 0, canvasSize, canvasSize);
+
+  if (!snake.isAlive) {
+    clearInterval(intervalId);
+    context.font = "30px Arial";
+    context.fillText("Game Over", 150, 200);
+    return;
+  }
+
+  // Move and render the snake
+  snake.move();
+  context.fillStyle = "green";
+  snake.body.forEach((cell) => {
+    context.fillRect(cell.x * gridSize, cell.y * gridSize, gridSize, gridSize);
+  });
+
+  // AI logic
+  const nextMove = ai.getNextMove(snake);
+  snake.changeDirection(nextMove);
+
+  // Update score
+  context.font = "20px Arial";
+  context.fillText("Score: " + snake.score, 10, 30);
+}
+
+// Start the game loop
+intervalId = setInterval(gameLoop, 100);
+```
+
+This code sets up a game canvas, creates a `Snake` class to represent the snake and handle its movement, defines an `SnakeAI` class to control the snake's direction, and implements a simple game loop. The snake's movement is controlled by the arrow keys, while the AI controls the snake's direction automatically based on a simple logic.
+
+Please note that this is a basic implementation and can be expanded upon to add more features and complexity to the game.
